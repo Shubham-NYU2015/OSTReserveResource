@@ -43,7 +43,7 @@
 	  </tr>
 	  {% for resource in allResourcesOfThisTag %}
 		  <tr>
-		    <td>{{ resource.resourceName }}</td>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{resource.resourceName}}">{{ resource.resourceName }}</a></td>
 		    <td>{{ resource.availableStartTime }} - {{ resource.availableEndTime }}</td>
 			<td>{{ resource.user }}</td>
 		  </tr>

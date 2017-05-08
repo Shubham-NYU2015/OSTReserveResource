@@ -2,9 +2,11 @@ import webapp2
 import os
 import jinja2
 import logging
+import datetime
 
 from google.appengine.ext import ndb
 from google.appengine.api import users
+from google.appengine.api import mail
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -17,8 +19,8 @@ class Resource(ndb.Model):
     availableStartTime = ndb.StringProperty()
     availableEndTime = ndb.StringProperty()
     tags = ndb.StringProperty(repeated=True)
-    #capacity = ndb.IntegerProperty()
-    #lastReservationMadeTime = ndb.DateTimeProperty(auto_now_add=False)
+    resourceReservedAt = ndb.DateTimeProperty(auto_now_add=False)
+    reservationCount = ndb.IntegerProperty()
     
 class Reservation(ndb.Model):
     user = ndb.StringProperty()
@@ -32,6 +34,12 @@ class DeleteReservation(webapp2.RequestHandler):
     def post(self):
         reservationID = self.request.get("reservationID")
         reservations = Reservation.query(Reservation.reservationID == reservationID).fetch()
+        
+        resource = Resource.query(Resource.resourceName == reservations[0].resourceName).fetch()
+        temp = resource[0].reservationCount
+        resource[0].reservationCount = temp - 1
+        resource[0].put()
+        
         for res in reservations:
             res.key.delete()
         self.redirect("/")
@@ -63,6 +71,7 @@ class CreateResource(webapp2.RequestHandler):
         resource.availableStartTime = newResourceAvailableStartTime
         resource.availableEndTime = newResourceAvailableEndTime
         resource.tags = newResourceTags
+        resource.reservationCount = 0;
         
         resource.put()
         self.redirect("/")     
@@ -99,6 +108,7 @@ class EditResource(webapp2.RequestHandler):
         resource[0].availableEndTime = newResourceAvailableEndTime
         resource[0].tags = newResourceTags
         resource[0].user = users.get_current_user().email()
+        resource[0].reservationCount = 0
         
         resource[0].put()
         self.redirect("/")
@@ -166,6 +176,18 @@ class ReserveResource(webapp2.RequestHandler):
         reservation.user = users.get_current_user().email()
         reservation.reservationID = resourceName + reservationDate + reservationStartTime + reservationDuration + users.get_current_user().email()
         
+        resource = Resource.query(Resource.resourceName == resourceName).fetch()
+        resource[0].resourceReservedAt = datetime.datetime.now()
+
+        temp = resource[0].reservationCount
+        resource[0].reservationCount = temp + 1
+        
+        mail.send_mail(sender="shubham.bits08@gmail.com", 
+                       to=reservation.user,
+                       subject="Reservation Confirmation",
+                       body="yoyo")
+        
+        resource[0].put()
         reservation.put()
         self.redirect("/")
         
@@ -195,7 +217,28 @@ class RSS(webapp2.RequestHandler):
                 'resourceReservation' : resourceReservation
             }    
         self.response.write(template.render(template_values))
+
+class Search(webapp2.RequestHandler):
+    def get(self):
+        template = JINJA_ENVIRONMENT.get_template('search.html')
+        template_values = {
+
+            }
+        self.response.write(template.render(template_values))
+    
+    def post(self):
+        searchCriteria_resourceName = self.request.get("resourceNameInput")
+        resource = Resource.query(Resource.resourceName == searchCriteria_resourceName).fetch()
         
+        logging.info("------------------------------")
+        logging.info(resource[0].resourceName)
+        logging.info("------------------------------")
+        
+        template = JINJA_ENVIRONMENT.get_template('search.html')
+        template_values = {
+                'resource' : resource
+            }
+        self.response.write(template.render(template_values))
         
 class MainPage(webapp2.RequestHandler):
     def get(self):
@@ -204,7 +247,7 @@ class MainPage(webapp2.RequestHandler):
             url_linktext = 'Logout'
             allResources = Resource.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
             userResources= Resource.query(Resource.user == users.get_current_user().email()).fetch()
-            userReservations = Reservation.query(Reservation.user == users.get_current_user().email()).fetch()
+            userReservations = Reservation.query(Reservation.user == users.get_current_user().email()).order(Reservation.reservationDate).order(Reservation.reservationStartTime).fetch()
             
             template_values = {
                 'user': users.get_current_user(),
@@ -232,7 +275,8 @@ application = webapp2.WSGIApplication([
   ('/reserveResource', ReserveResource),
   ('/deleteReservation', DeleteReservation),
   ('/UserInfo', UserInfo),
-  ('/rss', RSS)
+  ('/rss', RSS),
+  ('/search', Search)
 ], debug=True)
 
 def main():

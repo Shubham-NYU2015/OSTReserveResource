@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+ <head>
+   <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+   <style>
+	table {
+	    font-family: arial, sans-serif;
+	    border-collapse: collapse;
+	    width: 100%;
+	}
+	
+	td, th {
+	    border: 1px solid #dddddd;
+	    text-align: left;
+	    padding: 8px;
+	}
+	
+	tr:nth-child(even) {
+	    background-color: #dddddd;
+	}
+   </style>
+    <title>Search</title>
+ </head>
+ 
+ <body>
+ <br>
+ <center><h1>Search Criterion</h1></center>
+ <p align="right" style="padding-right: 30px;"><a href='/'>Go Back to <i>HOME</i></a></p>
+ <hr size=5 noshade>
+ <br>
+ <br>
+ <form action="/search" method="post" id="searchForm">
+ 	
+ 	<p style="padding-left: 35%;">Name:&nbsp;
+ 	<input type="text" size="35" name="resourceNameInput" id="resourceNameInput"
+ 	placeholder="Enter the Name of the Resource to Search" value="{{ resourceName }}" ></p>
+ 	
+ 	<!--  <p style="padding-left: 35%;">Start Time:&nbsp;
+ 	<input type="time" name="availableStartTimeInput" id="availableStartTimeInput"
+ 	value="{{ availableStartTime }}"></p>
+ 	
+ 	<p style="padding-left: 35%;">End Time:&nbsp;
+ 	<input type="time" name="availableEndTimeInput" id="availableEndTimeInput"
+ 	value="{{ availableEndTime }}"></p>  -->
+ 	
+ 	<p style="padding-left: 45%;">
+ 	 	
+ 	<input type="submit" value="SEARCH" class="buttonSearch"></p>
+ 	
+ </form>
+ {% if resource %}
+	<table>
+	  <tr>
+	    <th>Resource Name</th>
+	    <th>Available Time</th>
+	    <th>Tags</th>
+	    <th>Owner</th>
+	  </tr>
+	  {% for res in resource %}
+		  <tr>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{res.resourceName}}">{{ res.resourceName }}</a></td>
+		    <td>{{ res.availableStartTime }} - {{ res.availableEndTime }}</td>
+			<td>{% for tag in res.tags %}
+					{% if tag %}
+			   			<a href="/tag?val={{ tag }}"><button class="buttonGreen buttonGreen1">{{ tag }}</button></a>  
+			   		{% endif %}
+			   	{% endfor %}
+			</td>
+			<td><a href="/UserInfo?val={{res.user}}">{{ res.user }}</a></td>
+		  </tr>
+	  {% endfor %}
+	</table>
+  {% endif %}
+ </body>
+</html>
+{% endautoescape %}
