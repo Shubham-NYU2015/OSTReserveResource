@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+ <head>
+   <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+
+   <style>
+	table {
+	    font-family: arial, sans-serif;
+	    border-collapse: collapse;
+	    width: 100%;
+	}
+	
+	td, th {
+	    border: 1px solid #dddddd;
+	    text-align: left;
+	    padding: 8px;
+	}
+	
+	tr:nth-child(even) {
+	    background-color: #dddddd;
+	}
+	</style>
+   
+ </head>
+ 
+  <body>
+	<div class="relative">
+	  <img src="/stylesheets/reservation.jpeg" alt="" width=210%>
+	  <p class="absolute-text">Hi {{ user }}, <a href="{{ url }}">{{ url_linktext }}</a></p>
+	</div>
+	
+	
+	<h3>RESERVATIONS</h3>
+	{% if userReservations %}
+	<table>
+	  <tr>
+	    <th>Resource Name</th>
+	    <th>Reservation Date</th>
+	    <th>Reservation Start Time</th>
+	    <th>Duration (min)</th>
+	    <th>Owner</th>
+	    <th>Delete Reservation</th>
+	  </tr>
+	  {% for reservation in userReservations %}
+		  <tr>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{reservation.resourceName}}">{{ reservation.resourceName }}</a></td>
+		    <td>{{ reservation.reservationDate }}</td>
+		    <td>{{ reservation.reservationStartTime }}</td>
+			<td>{{ reservation.duration }}</td>
+			<td><a href="/UserInfo?val={{reservation.user}}">{{ reservation.user }}</a></td>
+			{% if currentUser == reservation.user %}
+				<td>Delete</td>
+			{% else %}
+				<td>Can't Delete</td>
+			{% endif %}
+		  </tr>
+	  {% endfor %}
+	</table>
+	{% endif %}
+	
+	<br>
+	<br>
+
+	<h3> ALL RESOURCES</h3>
+	
+	{% if allResources %}
+	<table>
+	  <tr>
+	    <th>Name</th>
+	    <th>Available Time</th>
+	    <th>Tags</th>
+	  </tr>
+	  {% for resource in allResources %}
+		  <tr>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{resource.resourceName}}">{{ resource.resourceName }}</a></td>
+		    <td>{{ resource.availableStartTime }} - {{ resource.availableEndTime }}</td>
+			<td>{% for tag in resource.tags %}
+					{% if tag %}
+			   			<a href="/tag?val={{tag}}"><button class="buttonGreen buttonGreen1">{{tag}}</button></a>  
+			   		{% endif %}
+			   	{% endfor %}
+			</td>
+		  </tr>
+	  {% endfor %}
+	</table>
+	{% endif %}
+	
+	<br>
+	<br>
+	
+	<div id="main">
+	  <h3> YOUR RESOURCES
+	  <a href="/createResource"><button class="buttonOrange buttonOrange1">ADD NEW RESOURCE</button></a></h3> 
+	</div>
+	
+	{% if userResources %}
+	<table>
+	  <tr>
+	    <th>Name</th>
+	    <th>Available Time</th>
+	    <th>Tags</th>
+	  </tr>
+	  {% for resource in userResources %}
+		  <tr>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{resource.resourceName}}">{{ resource.resourceName }}</a></td>
+		    <td>{{ resource.availableStartTime }} - {{ resource.availableEndTime }}</td>
+			<td>{% for tag in resource.tags %}
+					{% if tag %}
+			   			<a href="/tag?val={{ tag }}"><button class="buttonGreen buttonGreen1">{{ tag }}</button></a>  
+			   		{% endif %}
+			   	{% endfor %}
+			</td>
+		  </tr>
+	  {% endfor %}
+	</table>
+	{% endif %}
+	
+  </body>
+</html>
+{% endautoescape %}

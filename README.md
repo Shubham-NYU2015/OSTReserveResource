@@ -1,2 +1,0 @@
-# OSTReserveResource
-#Shubham Jain

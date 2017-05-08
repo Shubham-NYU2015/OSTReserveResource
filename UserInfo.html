@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+ <head>
+   <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+
+   <style>
+	table {
+	    font-family: arial, sans-serif;
+	    border-collapse: collapse;
+	    width: 100%;
+	}
+	
+	td, th {
+	    border: 1px solid #dddddd;
+	    text-align: left;
+	    padding: 8px;
+	}
+	
+	tr:nth-child(even) {
+	    background-color: #dddddd;
+	}	
+	</style>
+   
+ </head>
+ 
+  <body>
+  	
+  	<div id="main">
+	  <h3>User Information</h3>
+	</div>
+	<a href='/'><p align="right" style="padding-right: 30px;">Go Back to <i>HOME</i></p></a>
+	<hr size=5 noshade>
+
+	<h4><u>Email</u>: {{ userEmail }}</h4>
+	
+	<hr size=5 noshade>
+	
+	<h3>RESERVATIONS</h3>
+	{% if userReservations %}
+	<table>
+	  <tr>
+	    <th>Resource Name</th>
+	    <th>Reservation Date</th>
+	    <th>Reservation Start Time</th>
+	    <th>Duration (min)</th>
+	  </tr>
+	  {% for reservation in userReservations %}
+		  <tr>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{reservation.resourceName}}">{{ reservation.resourceName }}</a></td>
+		    <td>{{ reservation.reservationDate }}</td>
+		    <td>{{ reservation.reservationStartTime }}</td>
+			<td>{{ reservation.duration }}</td>
+		  </tr>
+	  {% endfor %}
+	</table>
+	{% endif %}
+	
+	<h3>RESOURCES</h3>
+	
+	{% if resource %}
+	<table>
+	  <tr>
+	    <th>Name</th>
+	    <th>Available Time</th>
+	    <th>Tags</th>
+	  </tr>
+	  {% for res in resource %}
+		  <tr>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{res.resourceName}}">{{ res.resourceName }}</a></td>
+		    <td>{{ res.availableStartTime }} - {{ res.availableEndTime }}</td>
+			<td>{% for tag in res.tags %}
+					{% if tag %}
+			   			<a href="/tag?val={{ tag }}"><button class="buttonGreen buttonGreen1">{{ tag }}</button></a>  
+			   		{% endif %}
+			   	{% endfor %}
+			</td>
+		  </tr>
+	  {% endfor %}
+	</table>
+	{% endif %}
+	
+  </body>
+</html>
+{% endautoescape %}

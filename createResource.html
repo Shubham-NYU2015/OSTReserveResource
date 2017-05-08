@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+ <head>
+   <!-- [START css] -->
+   <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+   <!-- [END css] -->
+    <title>Add Resource</title>
+ </head>
+ 
+ <body>
+ <br>
+ <center><h1>Create a New Resource</h1></center>
+ <p align="right" style="padding-right: 30px;"><a href='/'>Go Back to <i>HOME</i></a></p>
+ <hr size=5 noshade>
+ <br>
+ <br>
+ <form action="/createResource" method="post" id="createResourceForm">
+ 	<p style="padding-left: 35%;">Name:&nbsp;
+ 	<input type="text" size="35" name="resourceNameInput" id="resourceNameInput"
+ 	placeholder="Enter the Name of the Resource" required value="{{ resourceName }}" ></p>
+ 	
+ 	<!-- <p style="padding-left: 35%;">Available Date:&nbsp;
+ 	<input type="date" name="availableDateInput" id="availableDateInput"
+ 	required value="{{ availableDate }}"></p>  -->
+ 	
+ 	<p style="padding-left: 35%;">Start Time:&nbsp;
+ 	<input type="time" name="availableStartTimeInput" id="availableStartTimeInput"
+ 	required value="{{ availableStartTime }}"></p>
+ 	
+ 	<p style="padding-left: 35%;">End Time:&nbsp;
+ 	<input type="time" name="availableEndTimeInput" id="availableEndTimeInput"
+ 	required value="{{ availableEndTime }}"></p>
+ 	
+ 	<p style="padding-left: 35%;">Tags:&nbsp;
+ 	<input type="text" size="60" name="tags" id="tags"
+ 	placeholder="Eg. classroom, library book, car share, video game, etc" value="{{ tags }}"></p>
+ 	
+ 	<p style="padding-left: 45%;">
+ 	<input type="submit" value="CREATE"></p>
+ 	
+ </form>
+ </body>
+ 
+</html>
+{% endautoescape %}

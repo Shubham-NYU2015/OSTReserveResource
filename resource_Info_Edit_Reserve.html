@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+ <head>
+   <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+
+<style>
+	table {
+	    font-family: arial, sans-serif;
+	    border-collapse: collapse;
+	    width: 100%;
+	}
+	
+	td, th {
+	    border: 1px solid #dddddd;
+	    text-align: left;
+	    padding: 8px;
+	}
+	
+	tr:nth-child(even) {
+	    background-color: #dddddd;
+	}
+</style>
+   
+ </head>
+ 
+  <body>
+  	
+  	<div id="main">
+	  <h3>Resource Information, Edit & Reservation</h3>
+	</div>
+	<a href='/'><p align="right" style="padding-right: 30px;">Go Back to <i>HOME</i></p></a>
+	<hr size=5 noshade>
+	
+	{% if allowedToEdit == "YES" %}
+		<a href="/editResource?val={{ resource[0].resourceName }}"><button class="buttonBlue buttonBlue1">EDIT RESOURCE</button></a></h3>
+	{% endif %}
+	
+	<a href="/reserveResource?val={{ resource[0].resourceName }}"><button class="buttonBlue buttonBlue1">RESERVE</button></a></h3>
+
+	<a href="/rss?val={{ resource[0].resourceName }}"><button class="buttonRSS buttonRSS1">GENERATE RSS</button></a></h3>
+	
+	
+	{% if resource %}
+	<table>
+	  <tr>
+	    <th>Name</th>
+	    <th>Available Time</th>
+	    <th>Tags</th>
+	    <th>Owner</th>
+	  </tr>
+	  {% for res in resource %}
+		  <tr>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{res.resourceName}}">{{ res.resourceName }}</a></td>
+		    <td>{{ res.availableStartTime }} - {{ res.availableEndTime }}</td>
+			<td>{% for tag in res.tags %}
+					{% if tag %}
+			   			<a href="/tag?val={{ tag }}"><button class="buttonGreen buttonGreen1">{{ tag }}</button></a>  
+			   		{% endif %}
+			   	{% endfor %}
+			</td>
+			<td><a href="/UserInfo?val={{res.user}}">{{ res.user }}</a></td>
+		  </tr>
+	  {% endfor %}
+	</table>
+	{% endif %}
+	
+	<h3>RESERVATIONS</h3>
+	{% if resourceReservation %}
+	<table>
+	  <tr>
+	    <th>Resource Name</th>
+	    <th>Reservation Date</th>
+	    <th>Reservation Start Time</th>
+	    <th>Duration (min)</th>
+	  </tr>
+	  {% for reservation in resourceReservation %}
+		  <tr>
+		    <td><a href="/resource_Info_Edit_Reserve?val={{reservation.resourceName}}">{{ reservation.resourceName }}</a></td>
+		    <td>{{ reservation.reservationDate }}</td>
+		    <td>{{ reservation.reservationStartTime }}</td>
+			<td>{{ reservation.duration }}</td>
+		  </tr>
+	  {% endfor %}
+	</table>
+	{% endif %}
+	
+  </body>
+</html>
+{% endautoescape %}

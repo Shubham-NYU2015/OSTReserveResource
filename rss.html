@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+ <head>
+   <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+ </head>
+  <body>
+  	<div id="main">
+	  <h3>RSS Information</h3>
+	</div>
+	<a href='/'><p align="right" style="padding-right: 30px;">Go Back to <i>HOME</i></p></a>
+	<hr size=5 noshade>
+	<font size=4>
+	<pre>
+	<span class="cp" style="color: #ff6600;">&lt;?xml version="1.0" encoding="UTF-8" ?&gt;</span>
+	<span style="color: #008000;">&lt;rss <span class="na"><span style="color: #99cc00;">version</span>=</span><span class="s" style="color: #ff0000;">"2.0"</span>&gt;</span>
+	<span class="nt" style="color: #008000;">&lt;channel&gt;
+	 &lt;title&gt;</span>Resource Name is {{ resource[0].resourceName }}<span class="nt" style="color: #008000;">&lt;/title&gt;
+	 &lt;description&gt;</span>This resource is available from {{ resource[0].availableStartTime }} - {{  resource[0].availableEndTime }}<span class="nt" style="color: #008000;">&lt;/description&gt;
+	 &lt;link&gt;</span>---NEED TO CHANGE---<span class="nt" style="color: #008000;">&lt;/link&gt;</span>
+	{% if resourceReservation%}{% for reservation in resourceReservation %}
+	  <span style="color: #008000;"><span class="nt">&lt;item&gt;</span>
+		<span class="nt">&lt;title&gt;</span></span>Reservation by {{ reservation.user }}<span class="nt" style="color: #008000;">&lt;/title&gt;
+		&lt;description&gt;</span>Reserved on {{ reservation.reservationDate }} from {{ reservation.reservationStartTime }} for a duration of {{ reservation.duration }} minutes.<span class="nt" style="color: #008000;">&lt;/description&gt;</span>
+	 <span class="nt" style="color: #008000;"> &lt;/item&gt;</span>
+	{% endfor %}{% else %}
+	  <span style="color: #008000;"><span class="nt">&lt;item&gt;</span>
+		<span class="nt">&lt;title&gt;</span></span>No Reservation for this resource.<span class="nt" style="color: #008000;">&lt;/title&gt;
+	 <span class="nt" style="color: #008000;"> &lt;/item&gt;</span>
+	{% endif %}
+	<span style="color: #008000;"><span class="nt">&lt;/channel&gt;</span>
+	<span class="nt">&lt;/rss&gt;</span></span>
+	</pre>
+	</font>
+	
+  </body>
+</html>
+{% endautoescape %}

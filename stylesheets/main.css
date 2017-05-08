@@ -1,0 +1,68 @@
+body {
+  font-family: Verdana, Helvetica, sans-serif;
+  background-color: #FFF5EE;
+}
+
+.relative{position:relative; width:600px;}
+.absolute-text{position:absolute; top:0; font-size:24px; font-family:"vedana"; background:rgba(251,251,251,0.5);
+padding:10px 60px 10px 600px; width:100%; text-align:right;}
+.absolute-text a{font-size:16px; color:#b92b27;}
+
+.buttonGreen {
+	    background-color: #4CAF50; /* Green */
+	    border: none;
+	    color: white;
+	    padding: 5px 15px;
+	    text-align: center;
+	    text-decoration: none;
+	    display: inline-block;
+	    font-size: 16px;
+	    margin: 4px 2px;
+	    cursor: pointer;
+	}
+.buttonGreen1 {border-radius: 12px;}
+	
+.buttonBlue {
+	    background-color: #5F9EA0; /* Blue */
+	    border: none;
+	    color: white;
+	    padding: 5px 15px;
+	    text-align: center;
+	    text-decoration: none;
+	    display: inline-block;
+	    font-size: 16px;
+	    margin: 4px 2px;
+	    cursor: default;
+	}
+.buttonBlue1 {border-radius: 5px;}
+
+.buttonOrange {
+	    background-color: #FFA500; /* Orange */
+	    border: none;
+	    color: white;
+	    padding: 5px 15px;
+	    text-align: center;
+	    text-decoration: none;
+	    display: inline-block;
+	    font-size: 16px;
+	    margin: 4px 2px;
+	    cursor: pointer;
+	}
+.buttonOrange1 {border-radius: 5px;}
+
+
+
+
+.buttonRSS {
+	    background-color: #FF8C00; /* Dark Orange */
+	    border: none;
+	    color: white;
+	    padding: 5px 15px;
+	    text-align: center;
+	    text-decoration: none;
+	    display: inline-block;
+	    font-size: 16px;
+	    margin: 4px 2px;
+	    cursor: pointer;
+	}
+.buttonRSS1 {border-radius: 5px;}

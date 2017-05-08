@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+ <head>
+   <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+
+   <style>
+	table {
+	    font-family: arial, sans-serif;
+	    border-collapse: collapse;
+	    width: 100%;
+	}
+	
+	td, th {
+	    border: 1px solid #dddddd;
+	    text-align: left;
+	    padding: 8px;
+	}
+	
+	tr:nth-child(even) {
+	    background-color: #dddddd;
+	}
+	</style>
+   
+ </head>
+ 
+  <body>
+  	
+  	<div id="main">
+	  <h3>TAG: 
+	  <button class="buttonGreen buttonGreen1" disabled>{{ tag }}</button>
+	  </h3>
+	</div>
+	<a href='/'><p align="right" style="padding-right: 30px;">Go Back to <i>HOME</i></p></a>
+	<hr size=5 noshade>
+	
+	{% if allResourcesOfThisTag %}
+	<table>
+	  <tr>
+	    <th>Name</th>
+	    <th>Available Time</th>
+	    <th>User</th>
+	  </tr>
+	  {% for resource in allResourcesOfThisTag %}
+		  <tr>
+		    <td>{{ resource.resourceName }}</td>
+		    <td>{{ resource.availableStartTime }} - {{ resource.availableEndTime }}</td>
+			<td>{{ resource.user }}</td>
+		  </tr>
+	  {% endfor %}
+	</table>
+	{% endif %}
+	
+  </body>
+</html>
+{% endautoescape %}
