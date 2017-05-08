@@ -73,6 +73,7 @@
 	    <th>Reservation Date</th>
 	    <th>Reservation Start Time</th>
 	    <th>Duration (min)</th>
+	    <th>Owner</th>
 	  </tr>
 	  {% for reservation in resourceReservation %}
 		  <tr>
@@ -80,6 +81,7 @@
 		    <td>{{ reservation.reservationDate }}</td>
 		    <td>{{ reservation.reservationStartTime }}</td>
 			<td>{{ reservation.duration }}</td>
+			<td>{{ reservation.user }}</td>
 		  </tr>
 	  {% endfor %}
 	</table>

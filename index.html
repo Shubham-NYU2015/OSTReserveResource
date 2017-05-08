@@ -49,11 +49,9 @@
 		    <td>{{ reservation.reservationStartTime }}</td>
 			<td>{{ reservation.duration }}</td>
 			<td><a href="/UserInfo?val={{reservation.user}}">{{ reservation.user }}</a></td>
-			{% if currentUser == reservation.user %}
-				<td>Delete</td>
-			{% else %}
-				<td>Can't Delete</td>
-			{% endif %}
+			<form action="/deleteReservation?reservationID={{ reservation.resourceName + reservation.reservationDate + reservation.reservationStartTime + reservation.duration + reservation.user }}" method="post" id="deleteReservationForm">
+				<td><input type="submit" value="DELETE" class="buttonRed"></p></td>
+			</form>
 		  </tr>
 	  {% endfor %}
 	</table>

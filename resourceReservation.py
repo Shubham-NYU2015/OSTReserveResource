@@ -26,11 +26,14 @@ class Reservation(ndb.Model):
     reservationDate = ndb.StringProperty()
     reservationStartTime = ndb.StringProperty()
     duration = ndb.StringProperty()
+    reservationID = ndb.StringProperty()
 
-class DeleteReservation(ndb.Model):
+class DeleteReservation(webapp2.RequestHandler):
     def post(self):
-        resourceName = self.request.get("resourceName")
-        
+        reservationID = self.request.get("reservationID")
+        reservations = Reservation.query(Reservation.reservationID == reservationID).fetch()
+        for res in reservations:
+            res.key.delete()
         self.redirect("/")
 
 class CreateResource(webapp2.RequestHandler):
@@ -161,6 +164,7 @@ class ReserveResource(webapp2.RequestHandler):
         reservation.reservationStartTime = reservationStartTime
         reservation.duration = reservationDuration
         reservation.user = users.get_current_user().email()
+        reservation.reservationID = resourceName + reservationDate + reservationStartTime + reservationDuration + users.get_current_user().email()
         
         reservation.put()
         self.redirect("/")
@@ -201,7 +205,6 @@ class MainPage(webapp2.RequestHandler):
             allResources = Resource.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
             userResources= Resource.query(Resource.user == users.get_current_user().email()).fetch()
             userReservations = Reservation.query(Reservation.user == users.get_current_user().email()).fetch()
-            currentUser = users.get_current_user().email()
             
             template_values = {
                 'user': users.get_current_user(),
@@ -209,8 +212,7 @@ class MainPage(webapp2.RequestHandler):
                 'url_linktext': url_linktext,
                 'allResources': allResources,
                 'userResources': userResources,
-                'userReservations': userReservations,
-                'currentUser' :  currentUser
+                'userReservations': userReservations
             }
             
             template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -228,7 +230,7 @@ application = webapp2.WSGIApplication([
   ('/resource_Info_Edit_Reserve', ResourceInfo),
   ('/editResource', EditResource),
   ('/reserveResource', ReserveResource),
-  ('/deleteResource', DeleteReservation),
+  ('/deleteReservation', DeleteReservation),
   ('/UserInfo', UserInfo),
   ('/rss', RSS)
 ], debug=True)
