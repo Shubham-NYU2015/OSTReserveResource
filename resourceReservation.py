@@ -166,6 +166,10 @@ class ResourceInfo(webapp2.RequestHandler):
             }
         self.response.write(template.render(template_values))
         
+def hms_to_minutes(t):
+    h, m, s = [int(i) for i in t.split(':')]
+    return (3600*h + 60*m + s)/60
+
 class ReserveResource(webapp2.RequestHandler):
     def get(self):
         template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
@@ -189,7 +193,8 @@ class ReserveResource(webapp2.RequestHandler):
         '''
         #If reservation date is less than the current date
         #TODO
-        if(reservationDate < datetime.datetime.now()):
+        currentDate = datetime.datetime.now() - datetime.timedelta(hours=4)
+        if(reservationDate < currentDate):
             Error0 = "Yes"
             template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
             template_values = {
@@ -216,9 +221,13 @@ class ReserveResource(webapp2.RequestHandler):
         
         #If the reservation end time is more than the resource available time
         #TODO
-        reservationEndTime = reservationStartTime + reservationDuration
         
-        if(reservationEndTime > resource[0].availableEndTime):
+        #reservationEndTime = reservationStartTime + datetime.timedelta(minutes=reservationDuration)
+        
+        allowedDuration = datetime.datetime.strptime(resource[0].availableEndTime, '%H:%M') - datetime.datetime.strptime(resource[0].availableStartTime, '%H:%M')
+        allowedDuration_min = hms_to_minutes(str(allowedDuration))
+        
+        if(reservationStartTime >= resource[0].availableStartTime and allowedDuration_min < reservationDuration):
             Error1 = "Yes"
             template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
             template_values = {
