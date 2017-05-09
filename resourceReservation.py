@@ -56,10 +56,13 @@ class CreateResource(webapp2.RequestHandler):
     def post(self):
         #Getting the values filed in the Create Resource page
         newResourceName = self.request.get("resourceNameInput")
-        #newResourceAvailableDate = self.request.get("availableDateInput")
         newResourceAvailableStartTime = self.request.get("availableStartTimeInput")
         newResourceAvailableEndTime = self.request.get("availableEndTimeInput")
         newResourceTags = self.request.get("tags").split(",")
+
+        newResourceTags_ = []
+        for tag in newResourceTags:
+            newResourceTags_.append(tag.strip())
 
         if(newResourceAvailableStartTime > newResourceAvailableEndTime):
             Error = "Yes"
@@ -67,7 +70,7 @@ class CreateResource(webapp2.RequestHandler):
             template_values = {
                     'Error' : Error,
                     'resourceName': newResourceName,
-                    'tags' : newResourceTags
+                    'tags' : newResourceTags_
                 }
             self.response.write(template.render(template_values))
             return
@@ -78,7 +81,7 @@ class CreateResource(webapp2.RequestHandler):
         resource.resourceName = newResourceName
         resource.availableStartTime = newResourceAvailableStartTime
         resource.availableEndTime = newResourceAvailableEndTime
-        resource.tags = newResourceTags
+        resource.tags = newResourceTags_
         resource.reservationCount = 0;
         resource.resourceReservedAt = datetime.datetime.now()
         
@@ -108,7 +111,11 @@ class EditResource(webapp2.RequestHandler):
         newResourceAvailableStartTime = self.request.get("availableStartTimeInput")
         newResourceAvailableEndTime = self.request.get("availableEndTimeInput")
         newResourceTags = self.request.get("tags").split(",")
-          
+        
+        newResourceTags_ = []
+        for tag in newResourceTags:
+            newResourceTags_.append(tag.strip())
+              
         if(newResourceAvailableStartTime > newResourceAvailableEndTime):
             Error = "Yes"
             template = JINJA_ENVIRONMENT.get_template('createResource.html')
@@ -125,7 +132,7 @@ class EditResource(webapp2.RequestHandler):
         resource[0].resourceName = newResourceName
         resource[0].availableStartTime = newResourceAvailableStartTime
         resource[0].availableEndTime = newResourceAvailableEndTime
-        resource[0].tags = newResourceTags
+        resource[0].tags = newResourceTags_
         resource[0].user = users.get_current_user().email()
         resource[0].reservationCount = 0
         
@@ -404,7 +411,6 @@ class MainPage(webapp2.RequestHandler):
             
         else:
             url = users.create_login_url(self.request.uri)
-            #url_linktext = 'Login'
             self.redirect(url)
 
 application = webapp2.WSGIApplication([
