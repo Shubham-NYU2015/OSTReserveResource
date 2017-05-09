@@ -32,7 +32,7 @@
 	<a href='/'><p align="right" style="padding-right: 30px;">Go Back to <i>HOME</i></p></a>
 	<hr size=5 noshade>
 	
-	{% if allowedToEdit == "YES" %}
+	{% if ((allowedToEdit == "YES" ) and (not resourceReservation)) %}
 		<a href="/editResource?val={{ resource[0].resourceName }}"><button class="buttonBlue buttonBlue1">EDIT RESOURCE</button></a></h3>
 	{% endif %}
 	

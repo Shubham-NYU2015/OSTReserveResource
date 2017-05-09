@@ -22,7 +22,7 @@
  	<input type="hidden" name="val" id="val" value="{{ resourceName }}">
  	
  	<p style="padding-left: 35%;">Available Date:&nbsp;
- 	<input type="date" name="availableDateInput" id="availableDateInput" required></p>
+ 	<input type="date" name="availableDateInput" id="availableDateInput" required value="{{ reservationDate }}"></p>
  	
  	<p style="padding-left: 35%;">Start Time:&nbsp;
  	<input type="time" name="availableStartTimeInput" id="availableStartTimeInput"
@@ -35,6 +35,28 @@
  	<input type="submit" value="RESERVE"></p>
  	
  </form>
+ 
+  {% if Error0 %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Reservation date has already gone! 
+  </div>
+  {% endif %}
+ 
+  {% if Error %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Reservation start time is less than the resource available start time! 
+  </div>
+  {% endif %}
+  
+  {% if Error1 %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Reservation end time is more than the resource available end time! 
+  </div>
+  {% endif %}
+  
  </body>
 </html>
 {% endautoescape %}

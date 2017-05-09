@@ -34,12 +34,19 @@
  	
  	<p style="padding-left: 35%;">Tags:&nbsp;
  	<input type="text" size="60" name="tags" id="tags"
- 	placeholder="Eg. classroom, library book, car share, video game, etc" value="{{ tags }}"></p>
+ 	placeholder="Eg. classroom, library book, car share, video game, etc" value="{{ tags|join(', ') }}"></p>
  	
  	<p style="padding-left: 45%;">
  	<input type="submit" value="CREATE"></p>
  	
  </form>
+ {% if Error %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Start time is more than the End time! 
+  </div>
+ {% endif %}
+ 
  </body>
  
 </html>

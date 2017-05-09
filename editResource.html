@@ -41,6 +41,12 @@
  	<input type="submit" value="SUBMIT"></p>
  	
  </form>
+ {% if Error %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Start time is more than the End time! 
+  </div>
+ {% endif %}
  </body>
  
 </html>

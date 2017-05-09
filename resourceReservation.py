@@ -19,7 +19,7 @@ class Resource(ndb.Model):
     availableStartTime = ndb.StringProperty()
     availableEndTime = ndb.StringProperty()
     tags = ndb.StringProperty(repeated=True)
-    resourceReservedAt = ndb.DateTimeProperty(auto_now_add=False)
+    #resourceReservedAt = ndb.DateTimeProperty(auto_now_add=False)
     reservationCount = ndb.IntegerProperty()
     
 class Reservation(ndb.Model):
@@ -60,8 +60,16 @@ class CreateResource(webapp2.RequestHandler):
         newResourceAvailableEndTime = self.request.get("availableEndTimeInput")
         newResourceTags = self.request.get("tags").split(",")
 
-        #Error checking and Validation of Data Entered
-        #TODO
+        if(newResourceAvailableStartTime > newResourceAvailableEndTime):
+            Error = "Yes"
+            template = JINJA_ENVIRONMENT.get_template('createResource.html')
+            template_values = {
+                    'Error' : Error,
+                    'resourceName': newResourceName,
+                    'tags' : newResourceTags
+                }
+            self.response.write(template.render(template_values))
+            return
         
         
         resource = Resource(parent=ndb.Key('Resource', "MyKey"))
@@ -99,9 +107,19 @@ class EditResource(webapp2.RequestHandler):
         newResourceAvailableStartTime = self.request.get("availableStartTimeInput")
         newResourceAvailableEndTime = self.request.get("availableEndTimeInput")
         newResourceTags = self.request.get("tags").split(",")
-        
-        #Error checking and Validation of Data Entered
-        #TODO
+          
+        if(newResourceAvailableStartTime > newResourceAvailableEndTime):
+            Error = "Yes"
+            template = JINJA_ENVIRONMENT.get_template('createResource.html')
+            template_values = {
+                    'Error' : Error,
+                    'resourceName': newResourceName,
+                    'availableStartTime' : resource[0].availableStartTime,
+                    'availableEndTime' : resource[0].availableEndTime,
+                    'tags' : newResourceTags
+                }
+            self.response.write(template.render(template_values))
+            return
         
         resource[0].resourceName = newResourceName
         resource[0].availableStartTime = newResourceAvailableStartTime
@@ -166,18 +184,63 @@ class ReserveResource(webapp2.RequestHandler):
         reservationStartTime = self.request.get("availableStartTimeInput")
         reservationDuration = self.request.get("reservationDurationInput")
         reservationDate = self.request.get("availableDateInput")
-
-        reservation = Reservation(parent=ndb.Key('Reservation', "MyKey"))
+        resource = Resource.query(Resource.resourceName == resourceName).fetch()
         
+        '''
+        #If reservation date is less than the current date
+        #TODO
+        if(reservationDate < datetime.datetime.now()):
+            Error0 = "Yes"
+            template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
+            template_values = {
+                    'Error' : Error0,
+                    'resourceName': resourceName,
+                    'availableStartTime' : reservationStartTime,
+                    'reservationDate' : reservationDate
+                }
+            self.response.write(template.render(template_values))
+            return
+        
+        #If the reservation time is less than the resource available time
+        if(reservationStartTime < resource[0].availableStartTime):
+            Error = "Yes"
+            template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
+            template_values = {
+                    'Error' : Error,
+                    'resourceName': resourceName,
+                    'availableStartTime' : reservationStartTime,
+                    'reservationDate' : reservationDate
+                }
+            self.response.write(template.render(template_values))
+            return
+        
+        #If the reservation end time is more than the resource available time
+        #TODO
+        reservationEndTime = reservationStartTime + reservationDuration
+        
+        if(reservationEndTime > resource[0].availableEndTime):
+            Error1 = "Yes"
+            template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
+            template_values = {
+                    'Error' : Error1,
+                    'resourceName': resourceName,
+                    'availableStartTime' : reservationStartTime,
+                    'reservationDate' : reservationDate
+                }
+            self.response.write(template.render(template_values))
+            return
+        
+        '''
+        
+        reservation = Reservation(parent=ndb.Key('Reservation', "MyKey"))
         reservation.resourceName = resourceName
         reservation.reservationDate = reservationDate
         reservation.reservationStartTime = reservationStartTime
         reservation.duration = reservationDuration
         reservation.user = users.get_current_user().email()
         reservation.reservationID = resourceName + reservationDate + reservationStartTime + reservationDuration + users.get_current_user().email()
-        
-        resource = Resource.query(Resource.resourceName == resourceName).fetch()
-        resource[0].resourceReservedAt = datetime.datetime.now()
+
+        #resource[0].resourceReservedAt = datetime.datetime.now()
 
         temp = resource[0].reservationCount
         resource[0].reservationCount = temp + 1
@@ -229,11 +292,7 @@ class Search(webapp2.RequestHandler):
     def post(self):
         searchCriteria_resourceName = self.request.get("resourceNameInput")
         resource = Resource.query(Resource.resourceName == searchCriteria_resourceName).fetch()
-        
-        logging.info("------------------------------")
-        logging.info(resource[0].resourceName)
-        logging.info("------------------------------")
-        
+
         template = JINJA_ENVIRONMENT.get_template('search.html')
         template_values = {
                 'resource' : resource
