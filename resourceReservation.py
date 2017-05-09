@@ -27,6 +27,7 @@ class Reservation(ndb.Model):
     resourceName = ndb.StringProperty(indexed = True)
     reservationDate = ndb.StringProperty()
     reservationStartTime = ndb.StringProperty()
+    reservationEndTime = ndb.StringProperty()
     duration = ndb.StringProperty()
     reservationID = ndb.StringProperty()
 
@@ -158,11 +159,23 @@ class ResourceInfo(webapp2.RequestHandler):
             allowedToEdit = "YES"
             
         resourceReservation = Reservation.query(Reservation.resourceName == resourceName).fetch()
+        
+        currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)
+        currentTime = ('%02d:%02d'%(currentDatefull.hour,currentDatefull.minute))
+            
+        userReservations_ = []   
+        currentDate = datetime.datetime.strftime(currentDatefull,'%Y-%m-%d')
+        for res in resourceReservation:
+            reserveDatefull = datetime.datetime.strptime(res.reservationDate, '%Y-%m-%d')
+            reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
+                
+            if(reserveDate >= currentDate and res.reservationEndTime > currentTime):
+                userReservations_.append(res)
             
         template_values = {
                 'resource' : resource,
                 'allowedToEdit' : allowedToEdit,
-                'resourceReservation' : resourceReservation
+                'resourceReservation' : userReservations_
             }
         self.response.write(template.render(template_values))
         
@@ -190,18 +203,37 @@ class ReserveResource(webapp2.RequestHandler):
         reservationDate = self.request.get("availableDateInput")
         resource = Resource.query(Resource.resourceName == resourceName).fetch()
         
-        '''
         #If reservation date is less than the current date
-        #TODO
-        currentDate = datetime.datetime.now() - datetime.timedelta(hours=4)
-        if(reservationDate < currentDate):
+        currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)        
+        currentDate = datetime.datetime.strftime(currentDatefull,'%Y-%m-%d')
+
+        reserveDatefull = datetime.datetime.strptime(reservationDate, '%Y-%m-%d')
+        reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
+        
+        if(reserveDate < currentDate):
             Error0 = "Yes"
             template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
             template_values = {
-                    'Error' : Error0,
+                    'Error0' : Error0,
                     'resourceName': resourceName,
                     'availableStartTime' : reservationStartTime,
-                    'reservationDate' : reservationDate
+                    'reservationDate' : reservationDate,
+                    'reservationDuration' : reservationDuration
+                }
+            self.response.write(template.render(template_values))
+            return
+        
+        #If Reservation Start time is less than the current time
+        currentTime = ('%02d:%02d'%(currentDatefull.hour,currentDatefull.minute))
+        if(reserveDate == currentDate and reservationStartTime < currentTime):
+            Error01 = "Yes"
+            template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
+            template_values = {
+                    'Error01' : Error01,
+                    'resourceName': resourceName,
+                    'availableStartTime' : resource[0].availableStartTime,
+                    'reservationDate' : reservationDate,
+                    'reservationDuration' : reservationDuration
                 }
             self.response.write(template.render(template_values))
             return
@@ -213,33 +245,28 @@ class ReserveResource(webapp2.RequestHandler):
             template_values = {
                     'Error' : Error,
                     'resourceName': resourceName,
-                    'availableStartTime' : reservationStartTime,
-                    'reservationDate' : reservationDate
+                    'availableStartTime' : resource[0].availableStartTime,
+                    'reservationDate' : reservationDate,
+                    'reservationDuration' : reservationDuration
                 }
             self.response.write(template.render(template_values))
             return
         
         #If the reservation end time is more than the resource available time
-        #TODO
-        
-        #reservationEndTime = reservationStartTime + datetime.timedelta(minutes=reservationDuration)
-        
         allowedDuration = datetime.datetime.strptime(resource[0].availableEndTime, '%H:%M') - datetime.datetime.strptime(resource[0].availableStartTime, '%H:%M')
         allowedDuration_min = hms_to_minutes(str(allowedDuration))
         
-        if(reservationStartTime >= resource[0].availableStartTime and allowedDuration_min < reservationDuration):
+        if(reservationStartTime >= resource[0].availableStartTime and allowedDuration_min < int(reservationDuration)):
             Error1 = "Yes"
             template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
             template_values = {
-                    'Error' : Error1,
+                    'Error1' : Error1,
                     'resourceName': resourceName,
                     'availableStartTime' : reservationStartTime,
                     'reservationDate' : reservationDate
                 }
             self.response.write(template.render(template_values))
             return
-        
-        '''
         
         reservation = Reservation(parent=ndb.Key('Reservation', "MyKey"))
         reservation.resourceName = resourceName
@@ -248,7 +275,10 @@ class ReserveResource(webapp2.RequestHandler):
         reservation.duration = reservationDuration
         reservation.user = users.get_current_user().email()
         reservation.reservationID = resourceName + reservationDate + reservationStartTime + reservationDuration + users.get_current_user().email()
-
+        
+        temp = datetime.datetime.strptime(reservation.reservationStartTime, '%H:%M') + datetime.timedelta(minutes=int(reservation.duration))
+        reservation.reservationEndTime = ('%02d:%02d'%(temp.hour,temp.minute))
+        
         #resource[0].resourceReservedAt = datetime.datetime.now()
 
         temp = resource[0].reservationCount
@@ -257,7 +287,12 @@ class ReserveResource(webapp2.RequestHandler):
         mail.send_mail(sender="shubham.bits08@gmail.com", 
                        to=reservation.user,
                        subject="Reservation Confirmation",
-                       body="yoyo")
+                       body='''Hi! 
+                       Your Reservation is booked. Reservation Details as follows:
+                       Reservation of: ''' + reservation.resourceName +
+                       '''Date: ''' + reservation.reservationDate +
+                       '''Start Time: ''' + reservation.reservationStartTime +
+                       '''Duration: ''' + reservation.duration)
         
         resource[0].put()
         reservation.put()
@@ -269,11 +304,24 @@ class UserInfo(webapp2.RequestHandler):
         userEmail = self.request.get('val')
         #logging.info(userEmail)
         resource = Resource.query(Resource.user == userEmail).fetch()
-        userReservations = Reservation.query(Reservation.user == userEmail).fetch()    
+        userReservations = Reservation.query(Reservation.user == userEmail).fetch()
+        
+        currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)
+        currentTime = ('%02d:%02d'%(currentDatefull.hour,currentDatefull.minute))
+            
+        userReservations_ = []   
+        currentDate = datetime.datetime.strftime(currentDatefull,'%Y-%m-%d')
+        for res in userReservations:
+            reserveDatefull = datetime.datetime.strptime(res.reservationDate, '%Y-%m-%d')
+            reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
+                
+            if(reserveDate >= currentDate and res.reservationEndTime > currentTime):
+                userReservations_.append(res)
+            
         template_values = {
                 'resource' : resource,
                 'userEmail' : userEmail,
-                'userReservations' : userReservations
+                'userReservations' : userReservations_
             }
         self.response.write(template.render(template_values))
         
@@ -282,11 +330,23 @@ class RSS(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('rss.html')
         resourceName = self.request.get('val')
         resource = Resource.query(Resource.resourceName == resourceName).fetch()
-        resourceReservation = Reservation.query(Reservation.resourceName == resourceName).fetch()
+        resourceReservation = Reservation.query(Reservation.resourceName == resourceName).fetch()    
+        
+        currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)
+        currentTime = ('%02d:%02d'%(currentDatefull.hour,currentDatefull.minute))
+            
+        userReservations_ = []   
+        currentDate = datetime.datetime.strftime(currentDatefull,'%Y-%m-%d')
+        for res in resourceReservation:
+            reserveDatefull = datetime.datetime.strptime(res.reservationDate, '%Y-%m-%d')
+            reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
+                
+            if(reserveDate >= currentDate and res.reservationEndTime > currentTime):
+                userReservations_.append(res)    
         
         template_values = {
                 'resource' : resource,
-                'resourceReservation' : resourceReservation
+                'resourceReservation' : userReservations_
             }    
         self.response.write(template.render(template_values))
 
@@ -315,7 +375,20 @@ class MainPage(webapp2.RequestHandler):
             url_linktext = 'Logout'
             allResources = Resource.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
             userResources= Resource.query(Resource.user == users.get_current_user().email()).fetch()
+            
+            currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)
+            currentTime = ('%02d:%02d'%(currentDatefull.hour,currentDatefull.minute))
+            
             userReservations = Reservation.query(Reservation.user == users.get_current_user().email()).order(Reservation.reservationDate).order(Reservation.reservationStartTime).fetch()
+            
+            userReservations_ = []   
+            currentDate = datetime.datetime.strftime(currentDatefull,'%Y-%m-%d')
+            for res in userReservations:
+                reserveDatefull = datetime.datetime.strptime(res.reservationDate, '%Y-%m-%d')
+                reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
+                
+                if(reserveDate >= currentDate and res.reservationEndTime > currentTime):
+                    userReservations_.append(res)
             
             template_values = {
                 'user': users.get_current_user(),
@@ -323,7 +396,7 @@ class MainPage(webapp2.RequestHandler):
                 'url_linktext': url_linktext,
                 'allResources': allResources,
                 'userResources': userResources,
-                'userReservations': userReservations
+                'userReservations': userReservations_
             }
             
             template = JINJA_ENVIRONMENT.get_template('index.html')
