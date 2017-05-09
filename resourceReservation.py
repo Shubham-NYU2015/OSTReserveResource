@@ -19,7 +19,7 @@ class Resource(ndb.Model):
     availableStartTime = ndb.StringProperty()
     availableEndTime = ndb.StringProperty()
     tags = ndb.StringProperty(repeated=True)
-    #resourceReservedAt = ndb.DateTimeProperty(auto_now_add=False)
+    resourceReservedAt = ndb.DateTimeProperty(auto_now_add=False)
     reservationCount = ndb.IntegerProperty()
     
 class Reservation(ndb.Model):
@@ -76,11 +76,11 @@ class CreateResource(webapp2.RequestHandler):
         resource = Resource(parent=ndb.Key('Resource', "MyKey"))
         resource.user = users.get_current_user().email()
         resource.resourceName = newResourceName
-        #resource.availableDate = newResourceAvailableDate
         resource.availableStartTime = newResourceAvailableStartTime
         resource.availableEndTime = newResourceAvailableEndTime
         resource.tags = newResourceTags
         resource.reservationCount = 0;
+        resource.resourceReservedAt = datetime.datetime.now()
         
         resource.put()
         self.redirect("/")     
@@ -169,7 +169,7 @@ class ResourceInfo(webapp2.RequestHandler):
             reserveDatefull = datetime.datetime.strptime(res.reservationDate, '%Y-%m-%d')
             reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
                 
-            if(reserveDate >= currentDate and res.reservationEndTime > currentTime):
+            if((reserveDate > currentDate) or (reserveDate == currentDate and res.reservationEndTime > currentTime)):
                 userReservations_.append(res)
             
         template_values = {
@@ -279,7 +279,7 @@ class ReserveResource(webapp2.RequestHandler):
         temp = datetime.datetime.strptime(reservation.reservationStartTime, '%H:%M') + datetime.timedelta(minutes=int(reservation.duration))
         reservation.reservationEndTime = ('%02d:%02d'%(temp.hour,temp.minute))
         
-        #resource[0].resourceReservedAt = datetime.datetime.now()
+        resource[0].resourceReservedAt = datetime.datetime.now()
 
         temp = resource[0].reservationCount
         resource[0].reservationCount = temp + 1
@@ -315,7 +315,7 @@ class UserInfo(webapp2.RequestHandler):
             reserveDatefull = datetime.datetime.strptime(res.reservationDate, '%Y-%m-%d')
             reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
                 
-            if(reserveDate >= currentDate and res.reservationEndTime > currentTime):
+            if((reserveDate > currentDate) or (reserveDate == currentDate and res.reservationEndTime > currentTime)):
                 userReservations_.append(res)
             
         template_values = {
@@ -341,7 +341,7 @@ class RSS(webapp2.RequestHandler):
             reserveDatefull = datetime.datetime.strptime(res.reservationDate, '%Y-%m-%d')
             reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
                 
-            if(reserveDate >= currentDate and res.reservationEndTime > currentTime):
+            if((reserveDate > currentDate) or (reserveDate == currentDate and res.reservationEndTime > currentTime)):
                 userReservations_.append(res)    
         
         template_values = {
@@ -373,8 +373,8 @@ class MainPage(webapp2.RequestHandler):
         if users.get_current_user():
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
-            allResources = Resource.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
-            userResources= Resource.query(Resource.user == users.get_current_user().email()).fetch()
+            allResources = Resource.query(ancestor=ndb.Key('Resource', "MyKey")).order(-Resource.resourceReservedAt).fetch()
+            userResources= Resource.query(Resource.user == users.get_current_user().email()).order(-Resource.resourceReservedAt).fetch()
             
             currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)
             currentTime = ('%02d:%02d'%(currentDatefull.hour,currentDatefull.minute))
@@ -387,7 +387,7 @@ class MainPage(webapp2.RequestHandler):
                 reserveDatefull = datetime.datetime.strptime(res.reservationDate, '%Y-%m-%d')
                 reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
                 
-                if(reserveDate >= currentDate and res.reservationEndTime > currentTime):
+                if((reserveDate > currentDate) or (reserveDate == currentDate and res.reservationEndTime > currentTime)):
                     userReservations_.append(res)
             
             template_values = {

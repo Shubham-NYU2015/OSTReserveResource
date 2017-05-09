@@ -33,7 +33,19 @@ indexes:
   - name: resourceReservedAt
 
 - kind: Resource
+  properties:
+  - name: user
+  - name: resourceReservedAt
+    direction: desc
+
+- kind: Resource
   ancestor: yes
   properties:
   - name: lastReservationMadeTime
+    direction: desc
+
+- kind: Resource
+  ancestor: yes
+  properties:
+  - name: resourceReservedAt
     direction: desc
