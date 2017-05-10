@@ -427,6 +427,30 @@ class Search(webapp2.RequestHandler):
                 }
             self.response.write(template.render(template_values))
             
+class sendEmailToUser(webapp2.RequestHandler):
+    def get(self):
+        allReservations = Reservation.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
+        
+        for reservation in allReservations:
+            currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)        
+            currentDate = datetime.datetime.strftime(currentDatefull,'%Y-%m-%d')
+
+            reserveDatefull = datetime.datetime.strptime(reservation.reservationDate, '%Y-%m-%d')
+            reserveDate = datetime.datetime.strftime(reserveDatefull,'%Y-%m-%d')
+
+            currentTime = ('%02d:%02d'%(currentDatefull.hour,currentDatefull.minute))
+
+            if(reserveDate == currentDate and reservation.reservationStartTime == currentTime):
+                mail.send_mail(sender="shubham.bits08@gmail.com", 
+                               to=reservation.user,
+                               subject="Reservation Started!",
+                               body='''Hi! 
+                               Your Reservation has started. Reservation Details as follows:
+                               Reservation of: ''' + reservation.resourceName +
+                               '''Date: ''' + reservation.reservationDate +
+                               '''Start Time: ''' + reservation.reservationStartTime +
+                               '''Duration: ''' + reservation.duration)
+                
 class MainPage(webapp2.RequestHandler):
     def get(self):
         if users.get_current_user():
@@ -475,7 +499,8 @@ application = webapp2.WSGIApplication([
   ('/deleteReservation', DeleteReservation),
   ('/UserInfo', UserInfo),
   ('/rss', RSS),
-  ('/search', Search)
+  ('/search', Search),
+  ('/sendEmailToUser', sendEmailToUser)
 ], debug=True)
 
 def main():

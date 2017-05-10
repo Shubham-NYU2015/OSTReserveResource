@@ -1,0 +1,4 @@
+cron:
+- description: sending emails to users when the reservation starts
+  url: /sendEmailToUser
+  schedule: every 1 mins
