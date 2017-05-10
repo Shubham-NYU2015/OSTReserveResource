@@ -36,19 +36,40 @@
  	<input type="text" size="35" name="resourceNameInput" id="resourceNameInput"
  	placeholder="Enter the Name of the Resource to Search" value="{{ resourceName }}" ></p>
  	
- 	<!--  <p style="padding-left: 35%;">Start Time:&nbsp;
+ 	<p align="center" style="padding-right: 30px;">OR</p>
+ 
+ 	<p style="padding-left: 35%;">Start Time:&nbsp;
  	<input type="time" name="availableStartTimeInput" id="availableStartTimeInput"
  	value="{{ availableStartTime }}"></p>
  	
- 	<p style="padding-left: 35%;">End Time:&nbsp;
- 	<input type="time" name="availableEndTimeInput" id="availableEndTimeInput"
- 	value="{{ availableEndTime }}"></p>  -->
+ 	<p style="padding-left: 35%;">Duration(mins):&nbsp;
+ 	<input type="text" name="DurationInput" id="DurationInput" value="{{ DurationInput }}"></p>
  	
- 	<p style="padding-left: 45%;">
- 	 	
- 	<input type="submit" value="SEARCH" class="buttonSearch"></p>
+ 	<p style="padding-left: 45%;"><input type="submit" value="SEARCH" class="buttonSearch"></p>
  	
  </form>
+ {% if Error0 %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Please provide atleast one search criterion! 
+  </div>
+ {% endif %}
+ 
+ {% if Error1 %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Please provide either the resource name OR the availability data, not both! 
+  </div>
+ {% endif %}
+ 
+ {% if Error2 %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Please provide both, the Start Time and Duration!
+  </div>
+ {% endif %}
+  
+ 
  {% if resource %}
 	<table>
 	  <tr>

@@ -367,14 +367,66 @@ class Search(webapp2.RequestHandler):
     
     def post(self):
         searchCriteria_resourceName = self.request.get("resourceNameInput")
-        resource = Resource.query(Resource.resourceName == searchCriteria_resourceName).fetch()
-
-        template = JINJA_ENVIRONMENT.get_template('search.html')
-        template_values = {
-                'resource' : resource
-            }
-        self.response.write(template.render(template_values))
+        searchCriteria_startTime = self.request.get("availableStartTimeInput")
+        searchCriteria_duration = self.request.get("DurationInput")
         
+        if(searchCriteria_startTime and searchCriteria_duration):
+            temp = datetime.datetime.strptime(searchCriteria_startTime, '%H:%M') + datetime.timedelta(minutes=int(searchCriteria_duration))
+            searchCrtiteria_endTime = ('%02d:%02d'%(temp.hour,temp.minute))
+            
+        if(not searchCriteria_resourceName and not searchCriteria_startTime and not searchCriteria_duration):
+            Error0 = "Yes"
+            template = JINJA_ENVIRONMENT.get_template('search.html')
+            template_values = {
+                    'Error0' : Error0
+                }
+            self.response.write(template.render(template_values))
+            return
+        
+        if(searchCriteria_resourceName and searchCriteria_startTime and searchCriteria_duration):
+            Error1 = "Yes"
+            template = JINJA_ENVIRONMENT.get_template('search.html')
+            template_values = {
+                    'Error1' : Error1
+                }
+            self.response.write(template.render(template_values))
+            return
+        
+        if(not searchCriteria_resourceName):
+            if not(searchCriteria_startTime and searchCriteria_duration):
+                Error2 = "Yes"
+                template = JINJA_ENVIRONMENT.get_template('search.html')
+                template_values = {
+                        'Error2' : Error2
+                    }
+                self.response.write(template.render(template_values))
+                return
+        
+        if(searchCriteria_resourceName):
+            resource = Resource.query(Resource.resourceName == searchCriteria_resourceName).fetch()
+            template = JINJA_ENVIRONMENT.get_template('search.html')
+            template_values = {
+                    'resource' : resource,
+                    'resourceName' : searchCriteria_resourceName
+                }
+            self.response.write(template.render(template_values))
+            
+        elif(searchCriteria_startTime and searchCriteria_duration):
+            allresources = Resource.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
+            available_resources = []
+            
+            for res in allresources:
+                if(res.availableStartTime <= searchCriteria_startTime and res.availableEndTime >= searchCrtiteria_endTime):
+                    available_resources.append(res)
+            
+            template = JINJA_ENVIRONMENT.get_template('search.html')
+            template_values = {
+                    'resource' : available_resources,
+                    'availableStartTime' : searchCriteria_startTime,
+                    'DurationInput' : searchCriteria_duration
+                }
+            self.response.write(template.render(template_values))
+            
 class MainPage(webapp2.RequestHandler):
     def get(self):
         if users.get_current_user():
