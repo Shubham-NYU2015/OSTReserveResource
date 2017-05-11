@@ -292,7 +292,10 @@ class ReserveResource(webapp2.RequestHandler):
         allowedDuration = datetime.datetime.strptime(resource[0].availableEndTime, '%H:%M') - datetime.datetime.strptime(resource[0].availableStartTime, '%H:%M')
         allowedDuration_min = hms_to_minutes(str(allowedDuration))
         
-        if(reservationStartTime >= resource[0].availableStartTime and allowedDuration_min < int(reservationDuration)):
+        temp = datetime.datetime.strptime(reservationStartTime, '%H:%M') + datetime.timedelta(minutes=int(reservationDuration))
+        reservationEndTime = ('%02d:%02d'%(temp.hour,temp.minute))
+          
+        if(reservationStartTime >= resource[0].availableStartTime and allowedDuration_min < int(reservationDuration) or reservationEndTime > resource[0].availableEndTime):
             Error1 = "Yes"
             template = JINJA_ENVIRONMENT.get_template('reserveResource.html')
             template_values = {
@@ -469,9 +472,6 @@ class sendEmailToUser(webapp2.RequestHandler):
         allReservations = Reservation.query().fetch()
         
         for reservation in allReservations:
-            logging.info("-------------------")
-            logging.info("Inside Reservations")
-            logging.info("-------------------")
             currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)        
             currentDate = datetime.datetime.strftime(currentDatefull,'%Y-%m-%d')
 
