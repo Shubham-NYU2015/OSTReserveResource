@@ -75,6 +75,20 @@ class CreateResource(webapp2.RequestHandler):
             self.response.write(template.render(template_values))
             return
         
+        allResources = Resource.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
+        for res in allResources:
+            if(newResourceName == res.resourceName):
+                Error1 = "Yes"
+                template = JINJA_ENVIRONMENT.get_template('createResource.html')
+                template_values = {
+                        'Error1' : Error1,
+                        'resourceName': newResourceName,
+                        'availableStartTime' : newResourceAvailableStartTime,
+                        'availableEndTime' : newResourceAvailableEndTime,
+                        'tags' : newResourceTags_
+                    }
+                self.response.write(template.render(template_values))
+                return
         
         resource = Resource(parent=ndb.Key('Resource', "MyKey"))
         resource.user = users.get_current_user().email()
@@ -83,7 +97,7 @@ class CreateResource(webapp2.RequestHandler):
         resource.availableEndTime = newResourceAvailableEndTime
         resource.tags = newResourceTags_
         resource.reservationCount = 0;
-        resource.resourceReservedAt = datetime.datetime.now()
+        resource.resourceReservedAt = None
         
         resource.put()
         self.redirect("/")     
@@ -118,7 +132,7 @@ class EditResource(webapp2.RequestHandler):
               
         if(newResourceAvailableStartTime > newResourceAvailableEndTime):
             Error = "Yes"
-            template = JINJA_ENVIRONMENT.get_template('createResource.html')
+            template = JINJA_ENVIRONMENT.get_template('editResource.html')
             template_values = {
                     'Error' : Error,
                     'resourceName': newResourceName,
@@ -128,6 +142,21 @@ class EditResource(webapp2.RequestHandler):
                 }
             self.response.write(template.render(template_values))
             return
+        
+        allResources = Resource.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
+        for res in allResources:
+            if(newResourceName == res.resourceName):
+                Error1 = "Yes"
+                template = JINJA_ENVIRONMENT.get_template('editResource.html')
+                template_values = {
+                        'Error1' : Error1,
+                        'resourceName': newResourceName,
+                        'availableStartTime' : newResourceAvailableStartTime,
+                        'availableEndTime' : newResourceAvailableEndTime,
+                        'tags' : newResourceTags_
+                    }
+                self.response.write(template.render(template_values))
+                return
         
         resource[0].resourceName = newResourceName
         resource[0].availableStartTime = newResourceAvailableStartTime
@@ -291,15 +320,18 @@ class ReserveResource(webapp2.RequestHandler):
         temp = resource[0].reservationCount
         resource[0].reservationCount = temp + 1
         
-        mail.send_mail(sender="shubham.bits08@gmail.com", 
-                       to=reservation.user,
-                       subject="Reservation Confirmation",
-                       body='''Hi! 
-                       Your Reservation is booked. Reservation Details as follows:
-                       Reservation of: ''' + reservation.resourceName +
-                       '''Date: ''' + reservation.reservationDate +
-                       '''Start Time: ''' + reservation.reservationStartTime +
-                       '''Duration: ''' + reservation.duration)
+       # mail.send_mail(sender="shubham.bits08@gmail.com", 
+       #                to=reservation.user,
+       #                subject="Reservation Confirmation",
+       #                body='''Hi! 
+       #                Your Reservation is booked. Reservation Details as follows:
+       #                Reservation of: ''' + reservation.resourceName +
+       #                '''
+       #                Date: ''' + reservation.reservationDate +
+       #                '''
+       #                Start Time: ''' + reservation.reservationStartTime +
+       #                '''
+       #                Duration: ''' + reservation.duration) 
         
         resource[0].put()
         reservation.put()
@@ -429,9 +461,17 @@ class Search(webapp2.RequestHandler):
             
 class sendEmailToUser(webapp2.RequestHandler):
     def get(self):
-        allReservations = Reservation.query(ancestor=ndb.Key('Resource', "MyKey")).fetch()
+        
+        logging.info("-------------------")
+        logging.info("Cron Job Working fine")
+        logging.info("-------------------")
+        
+        allReservations = Reservation.query().fetch()
         
         for reservation in allReservations:
+            logging.info("-------------------")
+            logging.info("Inside Reservations")
+            logging.info("-------------------")
             currentDatefull = datetime.datetime.now() - datetime.timedelta(hours=4)        
             currentDate = datetime.datetime.strftime(currentDatefull,'%Y-%m-%d')
 
@@ -447,9 +487,12 @@ class sendEmailToUser(webapp2.RequestHandler):
                                body='''Hi! 
                                Your Reservation has started. Reservation Details as follows:
                                Reservation of: ''' + reservation.resourceName +
-                               '''Date: ''' + reservation.reservationDate +
-                               '''Start Time: ''' + reservation.reservationStartTime +
-                               '''Duration: ''' + reservation.duration)
+                               '''
+                               Date: ''' + reservation.reservationDate +
+                               '''
+                               Start Time: ''' + reservation.reservationStartTime +
+                               '''
+                               Duration: ''' + reservation.duration)
                 
 class MainPage(webapp2.RequestHandler):
     def get(self):

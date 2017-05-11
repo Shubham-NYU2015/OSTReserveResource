@@ -17,7 +17,7 @@
 	<span class="nt" style="color: #008000;">&lt;channel&gt;
 	 &lt;title&gt;</span>Resource Name is {{ resource[0].resourceName }}<span class="nt" style="color: #008000;">&lt;/title&gt;
 	 &lt;description&gt;</span>This resource is available from {{ resource[0].availableStartTime }} - {{  resource[0].availableEndTime }}<span class="nt" style="color: #008000;">&lt;/description&gt;
-	 &lt;link&gt;</span>---NEED TO CHANGE---<span class="nt" style="color: #008000;">&lt;/link&gt;</span>
+	 &lt;link&gt;</span>https://resource-reservation-sj2180.appspot.com/resource_Info_Edit_Reserve?val={{ resource[0].resourceName }}<span class="nt" style="color: #008000;">&lt;/link&gt;</span>
 	{% if resourceReservation%}{% for reservation in resourceReservation %}
 	  <span style="color: #008000;"><span class="nt">&lt;item&gt;</span>
 		<span class="nt">&lt;title&gt;</span></span>Reservation by {{ reservation.user }}<span class="nt" style="color: #008000;">&lt;/title&gt;

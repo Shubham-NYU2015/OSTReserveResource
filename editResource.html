@@ -41,6 +41,14 @@
   <strong>Error!</strong> Start time is more than the End time! 
   </div>
  {% endif %}
+ 
+ {% if Error1 %}
+  <div class="alert">
+  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+  <strong>Error!</strong> Resource name already exists. Please specify another name! 
+  </div>
+ {% endif %}
+ 
  </body>
  
 </html>

@@ -39,13 +39,13 @@
 	  <tr>
 	    <th>Name</th>
 	    <th>Available Time</th>
-	    <th>User</th>
+	    <th>Owner</th>
 	  </tr>
 	  {% for resource in allResourcesOfThisTag %}
 		  <tr>
 		    <td><a href="/resource_Info_Edit_Reserve?val={{resource.resourceName}}">{{ resource.resourceName }}</a></td>
 		    <td>{{ resource.availableStartTime }} - {{ resource.availableEndTime }}</td>
-			<td>{{ resource.user }}</td>
+			<td><a href="/UserInfo?val={{resource.user}}">{{ resource.user }}</a></td>
 		  </tr>
 	  {% endfor %}
 	</table>
