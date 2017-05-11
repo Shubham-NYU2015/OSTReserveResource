@@ -81,7 +81,7 @@
 		    <td>{{ reservation.reservationDate }}</td>
 		    <td>{{ reservation.reservationStartTime }}</td>
 			<td>{{ reservation.duration }}</td>
-			<td>{{ reservation.user }}</td>
+			<td><a href="/UserInfo?val={{reservation.user}}">{{ reservation.user }}</a></td>
 		  </tr>
 	  {% endfor %}
 	</table>
