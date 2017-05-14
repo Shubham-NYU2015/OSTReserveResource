@@ -323,18 +323,18 @@ class ReserveResource(webapp2.RequestHandler):
         temp = resource[0].reservationCount
         resource[0].reservationCount = temp + 1
         
-       # mail.send_mail(sender="shubham.bits08@gmail.com", 
-       #                to=reservation.user,
-       #                subject="Reservation Confirmation",
-       #                body='''Hi! 
-       #                Your Reservation is booked. Reservation Details as follows:
-       #                Reservation of: ''' + reservation.resourceName +
-       #                '''
-       #                Date: ''' + reservation.reservationDate +
-       #                '''
-       #                Start Time: ''' + reservation.reservationStartTime +
-       #                '''
-       #                Duration: ''' + reservation.duration) 
+        mail.send_mail(sender="shubham.bits08@gmail.com", 
+                       to=reservation.user,
+                       subject="Reservation Confirmation",
+                       body='''Hi! 
+                       Your Reservation is booked. Reservation Details as follows:
+                       Reservation of: ''' + reservation.resourceName +
+                       '''
+                       Date: ''' + reservation.reservationDate +
+                       '''
+                       Start Time: ''' + reservation.reservationStartTime +
+                       '''
+                       Duration: ''' + reservation.duration)
         
         resource[0].put()
         reservation.put()
